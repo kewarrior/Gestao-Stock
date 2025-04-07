@@ -69,7 +69,7 @@
 		}
 		else
 		{
-			msg = "Produto Inserido com sucesso";
+			msg = await responseMessage.Content.ReadAsStringAsync();
 			produto = new();
 		}
 	}

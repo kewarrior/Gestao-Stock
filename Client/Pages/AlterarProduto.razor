@@ -1,0 +1,116 @@
+﻿@page "/AlterarProduto"
+
+@using global::Shared.Models
+@inject HttpClient httpClient
+
+<h2>Alterar Produtos</h2>
+
+<div class="shadow p-3">
+
+	<label>
+		Id Produto:
+		<InputNumber 
+		class="from-control" Min="0"
+		@bind-Value = "produtoId">
+		</InputNumber>
+	</label>
+
+	<div class="mt-3">
+		<button class="btn btn-primary" 
+		@onclick="Consultar">
+			Consultar
+		</button>
+	</div>
+
+	<hr />
+
+	<EditForm Model="produto" OnValidSubmit="Alterar" class="d-flex flex-column ">
+
+		<label class="mt-2">
+			Nome:<br />
+			<InputText class="from-control" 
+						@bind-Value="produto.Nome">
+			</InputText>
+		</label>
+
+		<label class="mt-2">
+			Preço:<br />
+			<InputNumber class="from-control" @bind-Value="produto.Preco"></InputNumber>
+		</label>
+
+		<label class="mt-2">
+			Quantidade:<br />
+			<InputNumber class="from-control" @bind-Value="produto.Quantidade"></InputNumber>
+		</label>
+
+		<label class="mt-2">
+			Imagem:<br />
+			<InputText class="from-control" @bind-Value="produto.Imagem"></InputText>
+		</label>
+
+		<div class="mt-2">
+			<button class="btn btn-primary" type="submit" @onclick="Alterar">
+				Alterar
+			</button>
+		</div>
+
+	</EditForm>
+
+	<div class="text-center p-3 text-danger">
+		@msg
+	</div>
+</div>
+
+
+
+
+@code {
+
+	int produtoId;
+	string msg = "";
+	Produto produto = new();
+
+	protected async Task Consultar()
+	{
+		string api = $"/api/Produtos/Consultar/{produtoId}";
+
+		HttpResponseMessage response = await httpClient.GetAsync(api);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			msg = await response.Content.ReadAsStringAsync();
+			produto = new();
+		}
+		else
+		{
+			produto = await response.Content.ReadFromJsonAsync<Produto>();
+		}
+	}
+
+	protected async Task Alterar()
+	{
+		if(produto == null )
+		{
+			msg = "Produto não encontrado";
+		}
+
+		string api = "api/Produtos/Atualizar";
+
+		HttpResponseMessage response = await httpClient.PutAsJsonAsync<Produto>(api,produto);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			msg = await response.Content.ReadAsStringAsync();
+
+			if (string.IsNullOrEmpty(msg))
+			{
+				msg = $"Nao foi possivel acessar a API{api}";
+			}
+		}
+		else
+		{
+			msg = "Produto alterado com sucesso";
+		}
+	}
+
+}

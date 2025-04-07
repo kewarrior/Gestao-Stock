@@ -13,7 +13,7 @@ namespace Server.Controllers
         public IActionResult Adicionar(Produto produto)
         {
             if (produto == null)
-                return BadRequest("Produto nao foi inserido");
+                return BadRequest("Produto não foi inserido");
 
             Produto? produtoAnterior = Banco.Produtos.OrderByDescending(p => p.Id).FirstOrDefault();
             if (produtoAnterior != null)
@@ -25,7 +25,7 @@ namespace Server.Controllers
                 produto.Id = 1;
             }
             Banco.Produtos.Add(produto);
-            return Ok("Produto inserido!");
+            return Ok("Produto Inserido!");
         }
 
 
