@@ -1,0 +1,77 @@
+﻿@page "/InserirProdutos"
+
+
+@using global::Shared.Models
+@inject HttpClient httpClient
+
+
+<h2>Aqui poderás inserir os produtos para Stock</h2>
+
+<div class="shadow p-3">
+
+	<EditForm Model="produto" OnInvalidSubmit="Inserir" class="d-flex flex-column">
+
+		<label>
+			Nome: 
+			<InputText class="form-control" @bind-value="produto.Nome" ></InputText>
+
+		</label>
+
+		<label class="mt-2">
+			Preco:
+			<InputNumber class="form-control" @bind-value="produto.Preco" ></InputNumber>
+		</label>
+
+		<label class="mt-2">
+			Quantidade:
+			<InputNumber class="form-control" @bind-value="produto.Quantidade"></InputNumber>
+		</label>
+
+		<label class="mt-2">
+			Imagem:
+			<InputText class="form-control" @bind-value="produto.Imagem" ></InputText>
+
+		</label>
+
+		<div class="mt-2">
+			<button class="btn btn-primary" type="submit" onclick="@Inserir">
+				Inserir
+			</button>
+		</div>
+
+	</EditForm>
+
+	<div class="text-center p-3 text-danger">
+		@msg
+	</div>
+
+
+</div>
+
+
+
+
+
+@code {
+
+
+	Produto produto = new();
+	string msg = "";
+
+	private async Task Inserir()
+	{
+		string api = "/api/Produtos/Inserir";
+		HttpResponseMessage responseMessage = await httpClient.PostAsJsonAsync(api, produto);
+
+		if (!responseMessage.IsSuccessStatusCode)
+		{
+			msg = await responseMessage.Content.ReadAsStringAsync();
+		}
+		else
+		{
+			msg = "Produto Inserido com sucesso";
+			produto = new();
+		}
+	}
+}
+
