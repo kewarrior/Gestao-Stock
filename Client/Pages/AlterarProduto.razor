@@ -27,29 +27,29 @@
 	<EditForm Model="produto" OnValidSubmit="Alterar" class="d-flex flex-column ">
 
 		<label class="mt-2">
-			Nome:<br />
-			<InputText class="from-control" 
+			Nome:
+			<InputText class="form-control" 
 						@bind-Value="produto.Nome">
 			</InputText>
 		</label>
 
 		<label class="mt-2">
-			Preço:<br />
-			<InputNumber class="from-control" @bind-Value="produto.Preco"></InputNumber>
+			Preço:
+			<InputNumber class="form-control" @bind-Value="produto.Preco"></InputNumber>
 		</label>
 
 		<label class="mt-2">
-			Quantidade:<br />
-			<InputNumber class="from-control" @bind-Value="produto.Quantidade"></InputNumber>
+			Quantidade:
+			<InputNumber class="form-control" @bind-Value="produto.Quantidade"></InputNumber>
 		</label>
 
 		<label class="mt-2">
-			Imagem:<br />
-			<InputText class="from-control" @bind-Value="produto.Imagem"></InputText>
+			Imagem:
+			<InputText class="form-control" @bind-Value="produto.Imagem"></InputText>
 		</label>
 
 		<div class="mt-2">
-			<button class="btn btn-primary" type="submit" @onclick="Alterar">
+			<button class="btn btn-primary" type="submit">
 				Alterar
 			</button>
 		</div>

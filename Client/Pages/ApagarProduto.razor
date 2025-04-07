@@ -1,0 +1,114 @@
+﻿@page "/ApagarProduto"
+
+@using global::Shared.Models
+@inject HttpClient httpClient
+
+
+<h3>Apagar Produto</h3>
+
+<div>
+	<label>
+		Id do Produto:
+		<InputNumber class="form-control" @bind-value="produto.Id"> </InputNumber>
+	</label>
+
+	<div class="mt-2">
+
+		<button class="btn btn-primary" @onclick="Consultar">Procurar</button>
+
+	</div>
+
+	<div>
+		<EditForm Model="produto" OnSubmit="Apagar" class="d-flex flex-column" >
+
+			<label class="mt-2">
+				Nome produto : 
+				<InputText class="form-control" @bind-value="produto.Nome" disabled></InputText>
+			</label>
+
+			<label class="mt-2">
+				Preco Produto:
+				<InputNumber class="form-control" @bind-value="produto.Preco" disabled>	</InputNumber>
+			</label>
+
+			<label class="mt-2">
+				Quantidade de Produto: 
+				<InputNumber class="form-control" @bind-value="produto.Quantidade" disabled></InputNumber>
+			</label>
+
+
+			<div>
+				<button class="btn btn-primary mt-2" type="submit">
+					Apagar 
+				</button>
+			</div>
+
+		</EditForm>
+
+	</div>
+
+	<div class="text-center p-3 text-danger">
+		@msg
+	</div>
+
+</div>
+
+
+
+
+@code {
+
+	Produto produto = new Produto();
+	string msg = "";
+
+
+
+	protected async Task Consultar()
+	{
+		string api = $"api/produtos/Consultar/{produto.Id}";
+
+		HttpResponseMessage response = await httpClient.GetAsync(api);
+
+		if (response.IsSuccessStatusCode)
+		{
+			produto = await response.Content.ReadFromJsonAsync<Produto>();
+			msg = "Produto encontrado";
+		}
+		else
+		{
+			produto = new Produto();
+			msg = "Produto não encontrado";
+		}
+	}
+
+	protected async Task Apagar()
+
+	{
+
+		if(produto is null)
+		{
+			msg = "Produto está nulo";
+		}
+
+
+		string api = $"api/Produtos/Apagar/{produto.Id}";
+
+		HttpResponseMessage response = await httpClient.DeleteAsync(api);
+
+		if (!response.IsSuccessStatusCode)
+		{
+
+			msg = await response.Content.ReadAsStringAsync();
+			if (string.IsNullOrEmpty(msg))
+			{
+				msg = $"Nao foi possivel aceder à API {api}";
+			}
+		}
+		else
+		{
+			msg = "Produto apagado com sucesso";
+			produto = new Produto();
+		}
+	}
+
+}
