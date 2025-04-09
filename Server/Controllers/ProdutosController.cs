@@ -29,6 +29,42 @@ namespace Server.Controllers
         }
 
 
+
+
+        [HttpPost ("Inserir-ou-Alterar")]
+        public IActionResult AdicionarOutAlterar(Produto produto)
+        {
+            if (produto == null) return BadRequest("Produto não foi inserido");
+            
+            Produto? produtoJaExiste = Banco.Produtos.Where(p=>p.Id.Equals(produto.Id)).FirstOrDefault();
+
+            if(produtoJaExiste == null)
+            {
+                Produto? produtoAnterior = Banco.Produtos.OrderByDescending(p => p.Id).FirstOrDefault();
+                if (produtoAnterior != null)
+                {
+                    produto.Id = produtoAnterior.Id + 1;
+                }
+                else
+                {
+                    produto.Id = 1;
+                }
+                Banco.Produtos.Add(produto);
+            }
+            else
+            {
+                produtoJaExiste.Nome = produto.Nome;
+                produtoJaExiste.Preco = produto.Preco;
+                produtoJaExiste.Quantidade = produto.Quantidade;
+                produtoJaExiste.Imagem = produto.Imagem;
+
+            }
+            return Ok("Produto Inserido ou Atualizado com sucesso!");
+        }
+        
+        
+
+
         [HttpGet("Consultar")]
         public IActionResult Listar(string? nome)
         {

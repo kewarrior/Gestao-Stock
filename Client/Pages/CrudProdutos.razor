@@ -62,7 +62,8 @@
                     <img src="@p.Imagem" class="w-25" alt="Imagem do produto" />
                 </td>
                 <td class="border p-1">
-                    <button class="btn btn-secondary" @onclick="@(e => Consultar(p.Id))">Alterar</button>
+                    <button class="btn btn-outline-secondary" @onclick="@(e => Consultar(p.Id))">Alterar</button>
+                    <button class="btn btn-outline-danger" @onclick="@(e => Apagar(p.Id))">Apagar</button>
                 </td>
             </tr>
         }
@@ -105,7 +106,7 @@
 
     private async Task Inserir()
     {
-        string api = "/api/Produtos/Inserir";
+        string api = "/api/Produtos/Inserir-ou-Alterar";
         HttpResponseMessage responseMessage = await httpClient.PostAsJsonAsync(api, produto);
 
         if (!responseMessage.IsSuccessStatusCode)
@@ -130,7 +131,6 @@
         else
         {
             string api = $"/api/Produtos/Consultar/{produtoId}";
-
             HttpResponseMessage response = await httpClient.GetAsync(api);
 
             if (!response.IsSuccessStatusCode)
@@ -144,4 +144,29 @@
             }
         }
     }
+
+
+    protected async Task Apagar(int produtoId)
+    {
+        string api = $"api/Produtos/Apagar/{produtoId}";
+
+            HttpResponseMessage response = await httpClient.DeleteAsync(api);
+
+            if (!response.IsSuccessStatusCode)
+            {
+
+                msg = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(msg))
+                {
+                    msg = $"Nao foi possivel aceder à API {api}";
+                }
+            }
+            else
+            {
+                msg = "Produto apagado com sucesso";
+                await Carregar();
+                produto = new Produto();
+            }
+    }
 }
+
