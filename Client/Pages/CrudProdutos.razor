@@ -1,0 +1,141 @@
+﻿@page "/CrudProdutos"
+@using global::Shared.Models
+@inject HttpClient httpClient
+
+<h3>Crud Produtos</h3>
+
+<p>Aqui é uma junção de todos as funcionalidades juntas.</p>
+
+<EditForm Model="produto" OnInvalidSubmit="Inserir" class="d-flex">
+
+    <label style="margin:10px">
+        Nome:
+        <InputText class="form-control" @bind-value="produto.Nome"></InputText>
+
+    </label>
+
+    <label style="margin:10px">
+        Preco:
+        <InputNumber class="form-control" @bind-value="produto.Preco"></InputNumber>
+    </label>
+
+    <label style="margin:10px">
+        Quantidade:
+        <InputNumber class="form-control" @bind-value="produto.Quantidade"></InputNumber>
+    </label>
+
+    <label style="margin:10px">
+        Imagem:
+        <InputText class="form-control" @bind-value="produto.Imagem"></InputText>
+
+    </label>
+
+
+    <button class="btn btn-primary" style="margin:10px;" type="submit" @onclick="Inserir">
+            Adicionar Produtos
+    </button>
+    
+
+</EditForm>
+
+<div class="text-center p-3">
+
+    <table class="table">
+
+        <tr>
+            <td class="border p-1">#</td>
+            <td class="border p-1">Nome</td>
+            <td class="border p-1">Preço</td>
+            <td class="border p-1">Quantidade</td>
+            <td class="border p-1">Imagem</td>
+            <td class="border p-1">Ações</td>
+        </tr>
+
+        @foreach (Produto p in produtos!)
+        {
+            <tr>
+                <td class="border p-1 ">@p.Id</td>
+                <td class="border p-1 ">@p.Nome</td>
+                <td class="border p-1 ">@p.Preco €</td>
+                <td class="border p-1 ">@p.Quantidade Unidades</td>
+                <td class="border p-1">
+                    <img src="@p.Imagem" class="w-25" alt="Imagem do produto" />
+                </td>
+                <td class="border p-1">
+                    <button class="btn btn-secondary" @onclick="@(e => Consultar(p.Id))">Alterar</button>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+@code {
+
+    private List<Produto>? produtos = new();
+    private string msg = "";
+    Produto produto = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Carregar();
+    }
+
+
+    protected async Task Carregar()
+    {
+
+
+        produtos = new();
+        string api = "/api/Produtos/Consultar";
+
+       
+        var response = await httpClient.GetAsync(api);
+
+        if (response.IsSuccessStatusCode)
+        {
+            produtos = await response.Content.ReadFromJsonAsync<List<Produto>>();
+
+
+        }
+        else
+        {
+            msg = await response.Content.ReadAsStringAsync();
+        }
+
+    }
+
+    private async Task Inserir()
+    {
+        string api = "/api/Produtos/Inserir";
+        HttpResponseMessage responseMessage = await httpClient.PostAsJsonAsync(api, produto);
+
+        if (!responseMessage.IsSuccessStatusCode)
+        {
+            msg = await responseMessage.Content.ReadAsStringAsync();
+        }
+        else
+        {
+            msg = await responseMessage.Content.ReadAsStringAsync();
+			await Carregar();
+            produto = new();
+        }
+    }
+
+    protected async Task Consultar(int produtoId)
+    {
+        string api = $"/api/Produtos/Consultar/{produtoId}";
+
+        HttpResponseMessage response = await httpClient.GetAsync(api);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            msg = await response.Content.ReadAsStringAsync();
+            produto = new();
+        }
+        else
+        {
+            produto = await response.Content.ReadFromJsonAsync<Produto>();
+        }
+    }
+}
