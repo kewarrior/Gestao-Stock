@@ -32,9 +32,9 @@
 
 
     <button class="btn btn-primary" style="margin:10px;" type="submit" @onclick="Inserir">
-            Adicionar Produtos
+        Adicionar Produtos
     </button>
-    
+
 
 </EditForm>
 
@@ -67,6 +67,11 @@
             </tr>
         }
     </table>
+
+
+	<div class="text-center p-3 text-danger">
+		@msg
+        </div>
 </div>
 
 
@@ -84,25 +89,18 @@
 
     protected async Task Carregar()
     {
-
-
         produtos = new();
         string api = "/api/Produtos/Consultar";
-
-       
         var response = await httpClient.GetAsync(api);
 
         if (response.IsSuccessStatusCode)
         {
             produtos = await response.Content.ReadFromJsonAsync<List<Produto>>();
-
-
         }
         else
         {
             msg = await response.Content.ReadAsStringAsync();
         }
-
     }
 
     private async Task Inserir()
@@ -117,25 +115,33 @@
         else
         {
             msg = await responseMessage.Content.ReadAsStringAsync();
-			await Carregar();
+            await Carregar();
             produto = new();
         }
     }
 
     protected async Task Consultar(int produtoId)
     {
-        string api = $"/api/Produtos/Consultar/{produtoId}";
 
-        HttpResponseMessage response = await httpClient.GetAsync(api);
-
-        if (!response.IsSuccessStatusCode)
+        if (produtoId == 0)
         {
-            msg = await response.Content.ReadAsStringAsync();
-            produto = new();
+            msg = "Produto não encontrado";
         }
         else
         {
-            produto = await response.Content.ReadFromJsonAsync<Produto>();
+            string api = $"/api/Produtos/Consultar/{produtoId}";
+
+            HttpResponseMessage response = await httpClient.GetAsync(api);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                msg = await response.Content.ReadAsStringAsync();
+                produto = new();
+            }
+            else
+            {
+                produto = await response.Content.ReadFromJsonAsync<Produto>();
+            }
         }
     }
 }

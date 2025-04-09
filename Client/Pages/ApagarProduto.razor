@@ -85,29 +85,32 @@
 
 	{
 
-		if(produto is null)
+		if(produto.Nome == null)
 		{
-			msg = "Produto está nulo";
-		}
-
-
-		string api = $"api/Produtos/Apagar/{produto.Id}";
-
-		HttpResponseMessage response = await httpClient.DeleteAsync(api);
-
-		if (!response.IsSuccessStatusCode)
-		{
-
-			msg = await response.Content.ReadAsStringAsync();
-			if (string.IsNullOrEmpty(msg))
-			{
-				msg = $"Nao foi possivel aceder à API {api}";
-			}
+			msg = "Produto com esse Id não existe";
 		}
 		else
 		{
-			msg = "Produto apagado com sucesso";
-			produto = new Produto();
+			string api = $"api/Produtos/Apagar/{produto.Id}";
+
+			HttpResponseMessage response = await httpClient.DeleteAsync(api);
+
+			if (!response.IsSuccessStatusCode)
+			{
+
+				msg = await response.Content.ReadAsStringAsync();
+				if (string.IsNullOrEmpty(msg))
+				{
+					msg = $"Nao foi possivel aceder à API {api}";
+				}
+			}
+				else
+				{
+					msg = "Produto apagado com sucesso";
+					produto = new Produto();
+				}
+
+
 		}
 	}
 
