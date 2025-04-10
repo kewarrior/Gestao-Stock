@@ -9,15 +9,33 @@
 <h3>Produtos</h3>
 
 
-<ul>
-    @foreach (Produto p in produtos)
-    {
-        <li>
-            @p.Nome - @p.Preco € - @p.Quantidade Unidades
-            <button @onclick="() => CarrinhoService.AdicionarProduto(p)">Adicionar ao Carrinho</button>
-        </li>
-    }
-</ul>
+<div class="p-3">
+    <table class="table text-center">
+        <tr>
+            <td class="border-1">Nome</td>
+            <td class="border-1">Preco</td>
+            <td class="border-1">Quantiadade</td>
+            <td class="border-1">Comprar</td>
+        </tr>
+
+        @foreach (Produto p in produtos)
+        {
+            <tr>
+                <td class="border-1">@p.Nome</td>
+                <td class="border-1">@p.Preco €</td>
+                <td class="border-1">@p.Quantidade Unidades</td>
+                <td>
+                    <button class="btn btn-outline-success" @onclick="() => CarrinhoService.AdicionarProduto(p)">Adicionar ao Carrinho</button>
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+
+<div>
+    <p class="text-center p-3 text-danger"> @msg </p>
+</div>
 
 @code {
 
@@ -26,14 +44,11 @@
     private string msg = "";
     string palavra = "";
 
-    public Produtos()
-    {
-    }
-
     protected override async Task OnInitializedAsync()
     {
-		await Carregar();
-	}
+        await Carregar();
+        msg = "Produtos carregados com sucesso!";
+    }
 
     protected async Task Carregar()
     {
@@ -60,10 +75,11 @@
 
     }
 
-	private void AdicionarProduto(Produto p)
-	{
-		CarrinhoService.AdicionarProduto(p);
-	}
-	
+    private async Task AdicionarProduto(Produto p)
+    {
+        CarrinhoService.AdicionarProduto(p);
+		msg = "Produto adicionado ao carrinho com sucesso!";
+		StateHasChanged();
+    }
 }
 

@@ -7,24 +7,41 @@
 @inject HttpClient httpClient
 
 
-<h3>Carrinho de Compras</h3>
+<h2>Carrinho de Compras</h2>
 
-<ul>
-    @foreach (var item in CarrinhoService.ObterProdutos())
-    {
-        <li>@item.Nome - @item.Preco.ToString("C")
-            <button @onclick="() => RemoverProduto(item)">Remover</button>
-        </li>
-    }
-</ul>
 
-<p>Total: @CarrinhoService.ObterTotal().ToString("C")</p>
+<div class="p-3">
+
+
+	<table class="table text-center">
+		<tr>
+			<td class="border-1">Nome do Produto</td>
+			<td class="border-1">Preço</td>
+			<td class="border-1">Ações</td>
+		</tr>
+
+		@foreach (var item in CarrinhoService.ObterProdutos())
+		{
+			<tr>
+				<td class="border-1">@item.Nome</td>
+				<td class="border-1">@item.Preco.ToString("C")</td>
+				<button class="btn btn-danger" @onclick="() => RemoverProduto(item)">Remover</button>
+			</tr>
+			
+		}
+	</table>
+</div>
+
+<div class="d-flex d-xl-inline-flex">
+	<p class="p-2"><strong>Total:</strong> @CarrinhoService.ObterTotal().ToString("C")</p>
+    <button class="btn btn-primary" style="width:auto; height:30px; padding:3px 2px;" @onclick="FinalizarCompra">Finalizar Compra</button>
+
+</div>
+
 
 @code {
 	private List<Produto>? produtos = new();
 	
-
-
 	private void RemoverProduto(Produto produto)
 	{
 		CarrinhoService.RemoverProduto(produto);
