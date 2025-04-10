@@ -1,0 +1,69 @@
+﻿@page "/produtos"
+@using Client.Services
+
+@using global::Shared.Models
+
+@inject CarrinhoService CarrinhoService
+@inject HttpClient httpClient
+
+<h3>Produtos</h3>
+
+
+<ul>
+    @foreach (Produto p in produtos)
+    {
+        <li>
+            @p.Nome - @p.Preco € - @p.Quantidade Unidades
+            <button @onclick="() => CarrinhoService.AdicionarProduto(p)">Adicionar ao Carrinho</button>
+        </li>
+    }
+</ul>
+
+@code {
+
+
+    private List<Produto>? produtos = new(); 
+    private string msg = "";
+    string palavra = "";
+
+    public Produtos()
+    {
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+		await Carregar();
+	}
+
+    protected async Task Carregar()
+    {
+        string api = "/api/Produtos/Consultar";
+
+        if (!string.IsNullOrEmpty(palavra))
+        {
+            api = $"/api/Produtos/Consultar?nome={palavra}";
+        }
+
+
+        HttpResponseMessage response = await httpClient.GetAsync(api);
+
+        if (response.IsSuccessStatusCode)
+        {
+            produtos = await response.Content.ReadFromJsonAsync<List<Produto>>();
+
+
+        }
+        else
+        {
+            msg = await response.Content.ReadAsStringAsync();
+        }
+
+    }
+
+	private void AdicionarProduto(Produto p)
+	{
+		CarrinhoService.AdicionarProduto(p);
+	}
+	
+}
+

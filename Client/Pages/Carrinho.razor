@@ -1,0 +1,37 @@
+﻿@page "/carrinho"
+
+@using Client.Services
+@using global::Shared.Models
+
+@inject CarrinhoService CarrinhoService
+@inject HttpClient httpClient
+
+
+<h3>Carrinho de Compras</h3>
+
+<ul>
+    @foreach (var item in CarrinhoService.ObterProdutos())
+    {
+        <li>@item.Nome - @item.Preco.ToString("C")
+            <button @onclick="() => RemoverProduto(item)">Remover</button>
+        </li>
+    }
+</ul>
+
+<p>Total: @CarrinhoService.ObterTotal().ToString("C")</p>
+
+@code {
+	private List<Produto>? produtos = new();
+	
+
+
+	private void RemoverProduto(Produto produto)
+	{
+		CarrinhoService.RemoverProduto(produto);
+	}
+	private void FinalizarCompra()
+	{
+		// Lógica para finalizar a compra
+		// Você pode enviar os dados do carrinho para o servidor ou processar o pagamento aqui
+	}
+}
