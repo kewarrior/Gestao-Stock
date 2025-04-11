@@ -1,54 +1,115 @@
 ﻿@page "/carrinho"
-
 @using Client.Services
 @using global::Shared.Models
 
 @inject CarrinhoService CarrinhoService
 @inject HttpClient httpClient
 
-
 <h2>Carrinho de Compras</h2>
 
-
 <div class="p-3">
-
-
 	<table class="table text-center">
 		<tr>
+			<td class="border-1">Id</td>
 			<td class="border-1">Nome do Produto</td>
 			<td class="border-1">Preço</td>
+			<td class="border-1">Quantidade</td>
 			<td class="border-1">Ações</td>
 		</tr>
 
-		@foreach (var item in CarrinhoService.ObterProdutos())
+		@foreach (Carro c in Carros)
 		{
 			<tr>
-				<td class="border-1">@item.Nome</td>
-				<td class="border-1">@item.Preco.ToString("C")</td>
-				<button class="btn btn-danger" @onclick="() => RemoverProduto(item)">Remover</button>
+				<td class="border-1">@c.Id</td>
+				<td class="border-1">@c.Nome</td>
+				<td class="border-1">@c.Preco.ToString("C")</td>
+				<td class="border-1">@c.Quantidade</td>
+				<td>
+					<button class="btn btn-danger" @onclick="() => RemoverProduto(c)">Remover</button>
+				</td>
 			</tr>
-			
 		}
+
 	</table>
 </div>
 
 <div class="d-flex d-xl-inline-flex">
-	<p class="p-2"><strong>Total:</strong> @CarrinhoService.ObterTotal().ToString("C")</p>
-    <button class="btn btn-primary" style="width:auto; height:30px; padding:3px 2px;" @onclick="FinalizarCompra">Finalizar Compra</button>
+	<p class="p-2"><strong>Total:</strong> @Total().ToString("C")</p>
+	<button class="btn btn-primary" style="width:auto; height:30px; padding:3px 2px;">Finalizar Compra</button>
 
 </div>
 
 
+
+<p class="text-center p-3 text-danger border-1">@msg</p>
+
 @code {
 	private List<Produto>? produtos = new();
-	
-	private void RemoverProduto(Produto produto)
+	private List<Carro> Carros = new();
+
+	string msg = "";
+
+
+
+	protected override async Task OnInitializedAsync()
 	{
-		CarrinhoService.RemoverProduto(produto);
+		await ConsultarCarrinho();
 	}
-	private void FinalizarCompra()
+
+	private async Task ConsultarCarrinho()
 	{
-		// Lógica para finalizar a compra
-		// Você pode enviar os dados do carrinho para o servidor ou processar o pagamento aqui
+		string api = "api/produtos/ConsultarCarrinho";
+		HttpResponseMessage responseMessage = await httpClient.GetAsync(api);
+		if (responseMessage.IsSuccessStatusCode)
+		{
+			Carros = await responseMessage.Content.ReadFromJsonAsync<List<Carro>>();
+		}
+		else
+		{
+			Carros = new List<Carro>(); // Garante que a lista seja limpa se o carrinho estiver vazio
+			msg = await responseMessage.Content.ReadAsStringAsync();
+		}
+
+		StateHasChanged(); // Força a atualização da interface
 	}
+
+
+	protected async Task RemoverProduto(Carro carro)
+	{
+		if (carro == null)
+		{
+			msg = "Produto inválido para remoção.";
+			return;
+		}
+
+		string api = $"api/produtos/ApagarCarrinho/{carro.Id}";
+		try
+		{
+			HttpResponseMessage response = await httpClient.DeleteAsync(api);
+			if (response.IsSuccessStatusCode)
+			{
+				msg = await response.Content.ReadAsStringAsync();
+				await ConsultarCarrinho(); // Atualiza a lista de produtos no carrinho
+			}
+			else
+			{
+				msg = $"Erro ao remover o produto: {await response.Content.ReadAsStringAsync()}";
+			}
+		}
+		catch (Exception ex)
+		{
+			msg = $"Erro inesperado: {ex.Message}";
+		}
+	}
+	private double Total()
+	{
+		double total = 0;
+
+		foreach (var carro in Carros) // Corrigido para usar a lista correta
+		{
+			total += carro.Preco * carro.Quantidade; // Corrigido para usar a variável correta
+		}
+		return total;
+	}
+
 }

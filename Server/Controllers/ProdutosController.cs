@@ -129,5 +129,82 @@ namespace Server.Controllers
             return Ok("Produto apagado com sucesso.");
 
         }
+
+        [HttpPost("AdicionarCarrinho")]
+        public async Task<IActionResult> AdicionarCarrinho(Produto produto)
+        {
+            if (produto == null)
+            {
+                return BadRequest("Produto inválido.");
+            }
+           var produtoExistente = Banco.Carros.FirstOrDefault(p => p.Nome == produto.Nome);
+
+            if (produtoExistente != null)
+            {
+                if(produtoExistente.Quantidade < produto.Quantidade)
+                {
+                    produtoExistente.Quantidade++;
+                }
+                else
+                {
+                    return BadRequest("Atingiu o máximo de quantidade de stock deste produto.");
+                }
+                
+            }
+            else
+            {
+                
+                Banco.Carros.Add(new Carro
+                {
+                    Id = produto.Id,
+                    Nome = produto.Nome,
+                    Preco = produto.Preco,
+                    Quantidade = 1,
+                    Imagem = produto.Imagem
+                });
+            }
+            return Ok("Produto adicionado ao carrinho com sucesso!");
+        }
+
+
+        [HttpGet("ConsultarCarrinho")]
+        public IActionResult ListarCarrinho()
+        {
+            List<Carro> retorno = Banco.Carros.ToList();
+
+            if (retorno.Any()) // Verifica se há itens no carrinho
+            {
+                return Ok(retorno);
+            }
+            else
+            {
+                return NotFound("Carrinho vazio!");
+            }
+        }
+
+
+        [HttpDelete("ApagarCarrinho/{id:int}")]
+        public IActionResult ApagarCarrinho(int id)
+        {
+            Carro? p = Banco.Carros.Where(p => p.Id == id).FirstOrDefault();
+            if (p == null)
+            {
+                return BadRequest("Produto não encontrado no carrinho");
+            }
+            else
+            {
+                if (p.Quantidade > 1)
+                {
+                    p.Quantidade--; 
+                    return Ok("Quantidade do produto descrementada com sucesso.");
+
+                }
+                else
+                {
+                    Banco.Carros.Remove(p);
+                    return Ok("Produto removido do carrinho com sucesso.");
+                }
+            }
+        }
     }
 }

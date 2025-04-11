@@ -1,6 +1,5 @@
 ﻿@page "/produtos"
 @using Client.Services
-
 @using global::Shared.Models
 
 @inject CarrinhoService CarrinhoService
@@ -14,18 +13,18 @@
         <tr>
             <td class="border-1">Nome</td>
             <td class="border-1">Preco</td>
-            <td class="border-1">Quantiadade</td>
+            <td class="border-1">Quantidade</td>
             <td class="border-1">Comprar</td>
         </tr>
 
-        @foreach (Produto p in produtos)
+        @foreach (Produto p in produtos!)
         {
             <tr>
                 <td class="border-1">@p.Nome</td>
                 <td class="border-1">@p.Preco €</td>
                 <td class="border-1">@p.Quantidade Unidades</td>
                 <td>
-                    <button class="btn btn-outline-success" @onclick="() => CarrinhoService.AdicionarProduto(p)">Adicionar ao Carrinho</button>
+                    <button class="btn btn-outline-success" @onclick="()=>AdicionarCarrinho(p)">Adicionar ao Carrinho</button>
                 </td>
             </tr>
         }
@@ -47,7 +46,7 @@
     protected override async Task OnInitializedAsync()
     {
         await Carregar();
-        msg = "Produtos carregados com sucesso!";
+
     }
 
     protected async Task Carregar()
@@ -65,21 +64,31 @@
         if (response.IsSuccessStatusCode)
         {
             produtos = await response.Content.ReadFromJsonAsync<List<Produto>>();
-
-
         }
         else
         {
             msg = await response.Content.ReadAsStringAsync();
         }
-
     }
 
-    private async Task AdicionarProduto(Produto p)
+    protected async Task AdicionarCarrinho(Produto produto)
     {
-        CarrinhoService.AdicionarProduto(p);
-		msg = "Produto adicionado ao carrinho com sucesso!";
-		StateHasChanged();
+        
+        string api = "/api/Produtos/AdicionarCarrinho";
+
+        
+        HttpResponseMessage responseMessage = await httpClient.PostAsJsonAsync(api, produto);
+
+       if (responseMessage.IsSuccessStatusCode)
+        {
+			msg = await responseMessage.Content.ReadAsStringAsync();
+        }
+        else
+        {
+            // Caso a resposta não seja bem-sucedida, leia a mensagem de erro
+            msg = await responseMessage.Content.ReadAsStringAsync();
+        }
     }
+
 }
 

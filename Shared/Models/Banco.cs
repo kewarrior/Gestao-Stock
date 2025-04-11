@@ -10,5 +10,6 @@ namespace Shared.Models
     {
 
         public static List<Produto> Produtos { get; set; } = new ();
+        public static List<Carro> Carros { get; set; } = new();
     }
 }
