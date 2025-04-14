@@ -131,17 +131,17 @@ namespace Server.Controllers
         }
 
         [HttpPost("AdicionarCarrinho")]
-        public async Task<IActionResult> AdicionarCarrinho(Produto produto)
+        public IActionResult AdicionarCarrinho(Produto produto)
         {
             if (produto == null)
             {
                 return BadRequest("Produto inválido.");
             }
-           var produtoExistente = Banco.Carros.FirstOrDefault(p => p.Nome == produto.Nome);
+            var produtoExistente = Banco.Carros.FirstOrDefault(p => p.Nome == produto.Nome);
 
             if (produtoExistente != null)
             {
-                if(produtoExistente.Quantidade < produto.Quantidade)
+                if (produtoExistente.Quantidade < produto.Quantidade)
                 {
                     produtoExistente.Quantidade++;
                 }
@@ -149,11 +149,11 @@ namespace Server.Controllers
                 {
                     return BadRequest("Atingiu o máximo de quantidade de stock deste produto.");
                 }
-                
+
             }
             else
             {
-                
+
                 Banco.Carros.Add(new Carro
                 {
                     Id = produto.Id,

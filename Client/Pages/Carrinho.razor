@@ -5,129 +5,116 @@
 @inject CarrinhoService CarrinhoService
 @inject HttpClient httpClient
 
-<h2>Carrinho de Compras</h2>
+<h2 class="text-center mt-4">🛒 Carrinho de Compras</h2>
 
-<div class="p-3">
-	<table class="table text-center">
-		<tr>
-			<td class="border-1">Id</td>
-			<td class="border-1">Nome do Produto</td>
-			<td class="border-1">Preço</td>
-			<td class="border-1">Quantidade</td>
-			<td class="border-1">Ações</td>
-		</tr>
+<div class="container mt-5">
+    @if (Carros.Count == 0)
+    {
+        <div class="text-center">
+            <h4 class="text-muted">Seu carrinho está vazio! 🛍️</h4>
+            <p>Adicione produtos para começar a comprar.</p>
+            <a href="/produtos" class="btn btn-primary">Explorar Produtos</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (Carro c in Carros)
+            {
+                <div class="col-md-4 mb-4" >
+                    <div class="card shadow-sm">
+                        <img src="@c.Imagem" class="w-50" alt="@c.Nome" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">@c.Nome</h5>
+                            <p class="card-text">Preço: <strong>@c.Preco.ToString("C")</strong></p>
+                            <p class="card-text">Quantidade: <strong>@c.Quantidade</strong></p>
+                            <button class="btn btn-danger btn-sm" @onclick="() => RemoverProduto(c)">Remover</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
 
-		@foreach (Carro c in Carros)
-		{
-			<tr>
-				<td class="border-1">@c.Id</td>
-				<td class="border-1">@c.Nome</td>
-				<td class="border-1">@c.Preco.ToString("C")</td>
-				<td class="border-1">@c.Quantidade</td>
-				<td>
-					<button class="btn btn-outline-danger" @onclick="() => RemoverProduto(c)">Remover</button>
-				</td>
-			</tr>
-		}
-	</table>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Resumo do Pedido</h4>
+                <p><strong>Valor Total (com IVA):</strong> @Total().ToString("C")</p>
+                <p><strong>Valor Total (sem IVA):</strong> @sIva().ToString("C")</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-success btn-lg" @onclick="FinalizarCompra">Finalizar Compra</button>
+            </div>
+        </div>
+    }
 </div>
 
-<div class="d-flex d-xl-inline-flex">
-	<p class="p-2"><strong>Valor total com Iva:</strong> @Total().ToString("C")</p>
-	<p class="p-2"><strong>Valor total sem Iva</strong> @sIva().ToString("C")</p>
-	<button class="btn btn-primary" style="width:auto; height:30px; padding:3px 2px;">Finalizar Compra</button>
-
-</div>
-
-
-
-<p class="text-center p-3 text-danger border-1">@msg</p>
+<p class="text-center text-danger mt-4">@msg</p>
 
 @code {
-	private List<Produto>? produtos = new();
-	private List<Carro> Carros = new();
+    private List<Carro> Carros = new();
+    private string msg = "";
 
-	string msg = "";
-
-
-
-	protected override async Task OnInitializedAsync()
-	{
-		await ConsultarCarrinho();
-	}
-
-	private async Task ConsultarCarrinho()
-	{
-		string api = "api/produtos/ConsultarCarrinho";
-		HttpResponseMessage responseMessage = await httpClient.GetAsync(api);
-		if (responseMessage.IsSuccessStatusCode)
-		{
-			Carros = await responseMessage.Content.ReadFromJsonAsync<List<Carro>>();
-		}
-		else
-		{
-			Carros = new List<Carro>(); // Garante que a lista seja limpa se o carrinho estiver vazio
-			msg = await responseMessage.Content.ReadAsStringAsync();
-		}
-
-		StateHasChanged(); // Força a atualização da interface
-	}
-
-
-	protected async Task RemoverProduto(Carro carro)
-	{
-		if (carro == null)
-		{
-			msg = "Produto inválido para remoção.";
-			return;
-		}
-
-		string api = $"api/produtos/ApagarCarrinho/{carro.Id}";
-		try
-		{
-			HttpResponseMessage response = await httpClient.DeleteAsync(api);
-			if (response.IsSuccessStatusCode)
-			{
-				msg = await response.Content.ReadAsStringAsync();
-				await ConsultarCarrinho();
-			}
-			else
-			{
-				msg = $"Erro ao remover o produto: {await response.Content.ReadAsStringAsync()}";
-			}
-		}
-		catch (Exception ex)
-		{
-			msg = $"Erro inesperado: {ex.Message}";
-		}
-	}
-
-	private double Total()
-	{
-		double total = 0;
-		double soma = 0;
-		double cIva = 0;
-		double iva = 0.23;
-
-		foreach (var carro in Carros)
-		{
-			soma += carro.Preco * carro.Quantidade;
-			cIva = soma * iva;
-			total = soma + cIva;
-		}
-        return total;
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarCarrinho();
     }
-	
 
-	private double sIva()
-	{
-		double total = 0;
+    private async Task ConsultarCarrinho()
+    {
+        string api = "api/produtos/ConsultarCarrinho";
+        HttpResponseMessage responseMessage = await httpClient.GetAsync(api);
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            Carros = await responseMessage.Content.ReadFromJsonAsync<List<Carro>>();
+        }
+        else
+        {
+            Carros = new List<Carro>();
+            msg = await responseMessage.Content.ReadAsStringAsync();
+        }
+    }
 
-		foreach(var carro in Carros)
-		{
-			total += carro.Preco * carro.Quantidade;
-		}
-		return total;
-	}
+    private async Task RemoverProduto(Carro carro)
+    {
+        if (carro == null)
+        {
+            msg = "Produto inválido para remoção.";
+            return;
+        }
 
+        string api = $"api/produtos/ApagarCarrinho/{carro.Id}";
+        try
+        {
+            HttpResponseMessage response = await httpClient.DeleteAsync(api);
+            if (response.IsSuccessStatusCode)
+            {
+                msg = await response.Content.ReadAsStringAsync();
+                await ConsultarCarrinho();
+            }
+            else
+            {
+                msg = $"Erro ao remover o produto: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            msg = $"Erro inesperado: {ex.Message}";
+        }
+    }
+
+    private double Total()
+    {
+        return Carros.Sum(carro => carro.Preco * carro.Quantidade * 1.23);
+    }
+
+    private double sIva()
+    {
+        return Carros.Sum(carro => carro.Preco * carro.Quantidade);
+    }
+
+    private void FinalizarCompra()
+    {
+        msg = "Compra finalizada com sucesso! Obrigado por comprar conosco. 🎉";
+        Carros.Clear();
+    }
 }
