@@ -112,9 +112,26 @@
         return Carros.Sum(carro => carro.Preco * carro.Quantidade);
     }
 
-    private void FinalizarCompra()
+    private async Task FinalizarCompra()
     {
-        msg = "Compra finalizada com sucesso! Obrigado por comprar conosco. 🎉";
-        Carros.Clear();
+        string api = "api/produtos/FinalizarCompra";
+
+        try
+        {
+            HttpResponseMessage response = await httpClient.DeleteAsync(api);
+            if (response.IsSuccessStatusCode)
+            {
+                msg = $"Compra finalizada com sucesso! Gastou { Total() } €";
+                Carros.Clear();
+            }
+            else
+            {
+                msg = $"Erro ao finalizar a compra: {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            msg = $"Erro inesperado: {ex.Message}";
+        }
     }
 }

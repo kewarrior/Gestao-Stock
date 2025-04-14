@@ -206,5 +206,17 @@ namespace Server.Controllers
                 }
             }
         }
+
+        [HttpDelete("FinalizarCompra")]
+        public IActionResult FinalizarCompra()
+        {
+            if (!Banco.Carros.Any()) // Verifica se o carrinho está vazio
+            {
+                return BadRequest("Carrinho vazio. Não é possível finalizar a compra.");
+            }
+
+            Banco.Carros.Clear(); // Limpa todos os itens do carrinho
+            return Ok("Compra finalizada com sucesso!");
+        }
     }
 }
