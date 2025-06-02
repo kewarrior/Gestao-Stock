@@ -89,7 +89,7 @@
             if (response.IsSuccessStatusCode)
             {
                 msg = await response.Content.ReadAsStringAsync();
-                await ConsultarCarrinho();
+                carro.Quantidade--;
             }
             else
             {

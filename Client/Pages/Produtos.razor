@@ -73,19 +73,18 @@
 
     protected async Task AdicionarCarrinho(Produto produto)
     {
-        
+
         string api = "/api/Produtos/AdicionarCarrinho";
 
-        
+
         HttpResponseMessage responseMessage = await httpClient.PostAsJsonAsync(api, produto);
 
-       if (responseMessage.IsSuccessStatusCode)
+        if (responseMessage.IsSuccessStatusCode)
         {
-			msg = await responseMessage.Content.ReadAsStringAsync();
+            msg = await responseMessage.Content.ReadAsStringAsync();
         }
         else
         {
-            // Caso a resposta não seja bem-sucedida, leia a mensagem de erro
             msg = await responseMessage.Content.ReadAsStringAsync();
         }
     }
