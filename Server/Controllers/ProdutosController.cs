@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Models;
 
@@ -59,7 +60,7 @@ namespace Server.Controllers
                 produtoJaExiste.Imagem = produto.Imagem;
 
             }
-            return Ok("Produto Inserido ou Atualizado com sucesso!");
+            return Ok("Os seguintes produtos foram ascrecentados ao stock: " + produto.Nome + " ,Quantidade de: " + produto.Quantidade + " unid" + " e o Preço de: " + produto.Preco + " €");
         }
         
         
